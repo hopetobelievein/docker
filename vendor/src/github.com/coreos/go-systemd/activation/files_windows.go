@@ -1,3 +1,5 @@
+// +build windows
+
 /*
 Copyright 2013 CoreOS Inc.
 
@@ -48,7 +50,7 @@ func Files(unsetEnv bool) []*os.File {
 
 	var files []*os.File
 	for fd := listenFdsStart; fd < listenFdsStart+nfds; fd++ {
-		syscall.CloseOnExec(fd)
+		syscall.CloseOnExec(syscall.Handle(fd))
 		files = append(files, os.NewFile(uintptr(fd), "LISTEN_FD_"+strconv.Itoa(fd)))
 	}
 
