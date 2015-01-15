@@ -65,17 +65,8 @@ func Init(root string, options []string) (graphdriver.Driver, error) {
 		return nil, graphdriver.ErrNotSupported
 	}
 
-	rootdir := path.Dir(root)
-
-	var buf syscall.Statfs_t
-	if err := syscall.Statfs(rootdir, &buf); err != nil {
-		return nil, fmt.Errorf("Couldn't stat the root directory: %s", err)
-	}
-
-	for _, magic := range incompatibleFsMagic {
-		if graphdriver.FsMagic(buf.Type) == magic {
-			return nil, graphdriver.ErrIncompatibleFS
-		}
+	if err := checkFSCompatibility(root); err != nil {
+		return nil, err
 	}
 
 	paths := []string{

@@ -8,13 +8,13 @@ import (
 	"net"
 	"os"
 	"os/exec"
-	"os/signal"
-	"strconv"
+	gosignal "os/signal"
 	"syscall"
 	"time"
 
 	"github.com/docker/docker/pkg/proxy"
 	"github.com/docker/docker/pkg/reexec"
+	"github.com/docker/docker/pkg/signal"
 )
 
 const userlandProxyCommandName = "docker-proxy"
@@ -82,33 +82,12 @@ func parseHostContainerAddrs() (host net.Addr, container net.Addr) {
 
 func handleStopSignals(p proxy.Proxy) {
 	s := make(chan os.Signal, 10)
-	signal.Notify(s, os.Interrupt, syscall.SIGTERM, syscall.SIGSTOP)
+	gosignal.Notify(s, os.Interrupt, syscall.SIGTERM, signal.SIGSTOP)
 
 	for _ = range s {
 		p.Close()
 
 		os.Exit(0)
-	}
-}
-
-func NewProxyCommand(proto string, hostIP net.IP, hostPort int, containerIP net.IP, containerPort int) UserlandProxy {
-	args := []string{
-		userlandProxyCommandName,
-		"-proto", proto,
-		"-host-ip", hostIP.String(),
-		"-host-port", strconv.Itoa(hostPort),
-		"-container-ip", containerIP.String(),
-		"-container-port", strconv.Itoa(containerPort),
-	}
-
-	return &proxyCommand{
-		cmd: &exec.Cmd{
-			Path: reexec.Self(),
-			Args: args,
-			SysProcAttr: &syscall.SysProcAttr{
-				Pdeathsig: syscall.SIGTERM, // send a sigterm to the proxy if the daemon process dies
-			},
-		},
 	}
 }
 
