@@ -10,3 +10,4 @@ import (
 // invalid signals so they don't get handled)
 const SIGCHLD = syscall.Signal(0xff)
 const SIGWINCH = syscall.Signal(0xff)
+const SIGSTOP = syscall.Signal(0xff)
