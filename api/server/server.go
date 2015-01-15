@@ -32,6 +32,7 @@ import (
 	"github.com/docker/docker/pkg/listenbuffer"
 	"github.com/docker/docker/pkg/parsers"
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/docker/docker/pkg/system"
 	"github.com/docker/docker/pkg/systemd"
 	"github.com/docker/docker/pkg/version"
 	"github.com/docker/docker/registry"
@@ -1494,8 +1495,11 @@ func setupUnixHttp(addr string, job *engine.Job) (*HttpServer, error) {
 	if err := syscall.Unlink(addr); err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
-	mask := syscall.Umask(0777)
-	defer syscall.Umask(mask)
+	mask, err := system.Umask(0777)
+	if err != nil {
+		return nil, err
+	}
+	defer system.Umask(mask)
 
 	l, err := newListener("unix", addr, job.GetenvBool("BufferRequests"))
 	if err != nil {
