@@ -1,4 +1,4 @@
-// +build linux
+// +build linux,windows
 
 package overlay
 
@@ -100,18 +100,8 @@ func Init(home string, options []string) (graphdriver.Driver, error) {
 	}
 
 	// check if they are running over btrfs
-	var buf syscall.Statfs_t
-	if err := syscall.Statfs(path.Dir(home), &buf); err != nil {
+	if err := checkFSCompatibility(home); err != nil {
 		return nil, err
-	}
-
-	switch graphdriver.FsMagic(buf.Type) {
-	case graphdriver.FsMagicBtrfs:
-		log.Error("'overlay' is not supported over btrfs.")
-		return nil, graphdriver.ErrIncompatibleFS
-	case graphdriver.FsMagicAufs:
-		log.Error("'overlay' is not supported over aufs.")
-		return nil, graphdriver.ErrIncompatibleFS
 	}
 
 	// Create the driver home dir
