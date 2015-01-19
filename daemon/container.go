@@ -288,7 +288,7 @@ func populateCommand(c *Container, env []string) error {
 		User:       c.Config.User,
 	}
 
-	processConfig.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	processConfig.SysProcAttr = &syscall.SysProcAttr{}
 	processConfig.Env = env
 
 	c.command = &execdriver.Command{
@@ -685,9 +685,9 @@ func (container *Container) Kill() error {
 		// Ensure that we don't kill ourselves
 		if pid := container.GetPid(); pid != 0 {
 			log.Infof("Container %s failed to exit within 10 seconds of kill - trying direct SIGKILL", utils.TruncateID(container.ID))
-			if err := syscall.Kill(pid, 9); err != nil {
-				return err
-			}
+			//if err := syscall.Kill(pid, 9); err != nil {
+			//	return err
+			//}
 		}
 	}
 

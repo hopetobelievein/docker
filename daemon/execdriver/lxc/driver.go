@@ -505,7 +505,6 @@ func (t *TtyConsole) AttachPipes(command *exec.Cmd, pipes *execdriver.Pipes) err
 
 	if pipes.Stdin != nil {
 		command.Stdin = t.SlavePty
-		command.SysProcAttr.Setctty = true
 
 		go func() {
 			io.Copy(t.MasterPty, pipes.Stdin)
