@@ -25,6 +25,11 @@ for platform in $DOCKER_CROSSPLATFORMS; do
 		mkdir -p "$DEST/$platform" # bundles/VERSION/cross/GOOS/GOARCH/docker-VERSION
 		export GOOS=${platform%/*}
 		export GOARCH=${platform##*/}
+        if [ "$platform" == "windows/amd64"  ]; then
+            # Cgo -H windows is incompatible with -linkmode external.
+            linkmode="-linkmode external"
+            export LDFLAGS_STATIC_DOCKER=${LDFLAGS_STATIC_DOCKER#*${linkmode}} # remove the "-linkmode external" build tag from windows build
+        fi
 		if [ -z "${daemonSupporting[$platform]}" ]; then
 			export LDFLAGS_STATIC_DOCKER="" # we just need a simple client for these platforms
 			export BUILDFLAGS=( "${ORIG_BUILDFLAGS[@]/ daemon/}" ) # remove the "daemon" build tag from platforms that aren't supported
